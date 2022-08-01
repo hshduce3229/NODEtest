@@ -9,7 +9,7 @@ var balls   = require('./util.js').balls;
 var ballMap = require('./util.js').ballMap;
 var Teacher = require('./util.js').Teacher;
 
-
+//test program port
 const port_redis = 6379;
 const redisHost = '0.0.0.0';
 const redis_client = redis.createClient(port_redis , redisHost);
