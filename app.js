@@ -20,7 +20,7 @@ function logger(req, res, next)
   next();
 }
 
-
+// 실행 
 async function run( name_ , age_ , local_ , email_ ) 
 {
 
