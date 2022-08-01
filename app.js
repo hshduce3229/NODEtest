@@ -41,11 +41,11 @@ async function run( name_ , age_ , local_ , email_ )
   //await redis_client.disconnect();
 }
   
-
+//3000 포트 리슨
 http.listen(3000, function(){ // http 서버가 포트 3000에서 수신 대기
   console.log('listening on *:3000');
 });
-
+//서버 초기화 
 function SeverInit (req, res) 
 {
 
