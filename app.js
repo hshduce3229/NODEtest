@@ -56,7 +56,7 @@ function SeverInit (req, res)
   snape.age // 58
   snape.subject; // Dark arts
 
-
+//아이디 입력 
   run('hongsh',11 ,'na' , 'hshduce222@ggdf' );
 
   if (req.url =='/' )
