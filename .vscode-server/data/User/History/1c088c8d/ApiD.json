@@ -1,0 +1,7 @@
+{
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "terminal.integrated.shellIntegration.enabled": true,
+    "remote.SSH.remotePlatform": {
+        "172.30.85.135": "linux"
+    }
+}

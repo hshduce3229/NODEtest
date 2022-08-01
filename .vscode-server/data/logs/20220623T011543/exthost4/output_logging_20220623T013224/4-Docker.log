@@ -1,0 +1,3 @@
+The Docker extension will try to connect to 'unix:///var/run/docker.sock', via context 'default'.
+Error: This command cannot be used in a remote session.
+Error: This command cannot be used in a remote session.

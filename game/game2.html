@@ -1,0 +1,229 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professor VS Student</title>
+    <style>
+        * {padding : 0; margin: 0;}
+        canvas {background: #eee; display: block; margin : 0 auto;}
+    </style>
+    
+    <script src="/socket.io/socket.io.js"></script>
+
+</head>
+<body>
+    <canvas id = "myCanvas" width ="1024" height = "768"></canvas>
+    <script>
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
+
+        var canvasbuffer = document.createElement("canvas");
+        canvasbuffer.width = 1024;
+        canvasbuffer.height = 768;
+        var ctxbuffer = canvasbuffer.getContext("2d");
+
+        var radius = 16
+        var playerSpeed = 4
+
+        var rightPressed = false;
+        var leftPressed = false;
+        var upPressed = false;
+        var downPressed = false;
+
+        function PlayerBall(id){
+            this.id = id;
+            this.color = "#FF00FF";
+            this.x = 1024/2;
+            this.y = 768/2;
+        }
+        
+        var balls  = [];
+        var ballMap = {};
+        var myId;
+
+        document.addEventListener("keydown", keyDownHandler,false);
+        document.addEventListener("keyup", keyUpHandler,false);
+
+        function keyDownHandler(e){
+            if (e.code == 'ArrowRight'){
+                rightPressed = true;
+            }
+            if (e.code == 'ArrowLeft'){
+                leftPressed = true;
+            }
+            if(e.code == "ArrowDown"){
+                downPressed = true;
+            }
+            if(e.code == "ArrowUp"){
+                upPressed = true;
+            }
+        }
+
+        function keyUpHandler(e){
+            if (e.code == "ArrowRight"){
+                rightPressed = false;
+            }
+            if (e.code == "ArrowLeft"){
+                leftPressed = false;
+            }
+            if(e.code == "ArrowDown"){
+                downPressed = false;
+            }
+            if(e.code == "ArrowUp"){
+                upPressed = false;
+            }
+        }
+
+        function joinUser(id,color,x,y)
+        {
+            let find_it = balls.filter((x) => x.id == id );
+
+            if (find_it ==false)
+            {
+                let ball = new PlayerBall(id);
+                ball.color = color;
+                ball.x = x;
+                ball.y = y;
+
+                balls.push(ball);
+                ballMap[id] = ball;
+
+                return ball;
+            }
+
+            return find_it;
+        }
+
+        function leaveUser(id){
+            for(var i = 0 ; i < balls.length; i++){
+                if(balls[i].id == id){
+                    balls.splice(i,1);
+                    break;
+                }
+            }
+            delete ballMap[id];
+        }
+
+        function updateState(id,x,y){
+            let ball = ballMap[id];
+            if(!ball){
+                return;
+            }
+            ball.x = x;
+            ball.y = y;
+
+        }
+
+        var socket = io();
+
+        socket.on('user_id', function(data){
+            myId = data;
+        });
+        socket.on('join_user', function(data){
+            joinUser(data.id, data.color, data.x, data.y);
+        })
+        socket.on('leave_user', function(data){
+            leaveUser(data);
+        })
+        socket.on('update_state', function(data){
+            updateState(data.id, data.x, data.y);
+        })
+        
+        function sendData() {
+            let curPlayer = ballMap[myId];
+            let data = {};
+            data = {
+                id : curPlayer.id,
+                x: curPlayer.x,
+                y: curPlayer.y,
+            };
+            if(data){
+                socket.emit("send_location", data);
+            }
+        }
+        function Backgounddraw(ctxbuffer)
+        {
+            var img = new Image();
+            img.onload = function()
+            {
+                ctxbuffer.drawImage(img,0,0,1024,768);
+                ctxbuffer.beginPath();
+                ctxbuffer.stroke();
+            }
+            img.src = 'http://172.30.85.135:3000/picture/bakground.jpg';
+        }
+
+        function Chardraw(ctxbuffer, x,y , w,h)
+        {
+            var img = new Image();
+            img.onload = function()
+            {
+                ctxbuffer.drawImage(img,x,y,w,h);
+                ctxbuffer.beginPath();
+                ctxbuffer.stroke();
+            }
+            img.src = 'http://172.30.85.135:3000/picture/hidra.jpg';
+        }
+
+        function treedraw(ctxbuffer, x,y , w,h)
+        {
+            var img = new Image();
+            img.onload = function()
+            {
+                ctxbuffer.drawImage(img,x,y,w,h);
+                ctxbuffer.beginPath();
+                ctxbuffer.stroke();
+            }
+            img.src = 'http://172.30.85.135:3000/picture/tree.png';
+        }
+
+        function renderPlayer() 
+        {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            Backgounddraw(ctxbuffer);
+            treedraw(ctxbuffer,300,300,300,300);
+            for (let i = 0; i < balls.length; i++) {
+                let ball = balls[i];
+                
+                Chardraw(ctxbuffer,ball.x, ball.y,200,200);
+                ctxbuffer.beginPath();
+                ctxbuffer.font = '15px Arial';
+                ctxbuffer.fillText(`player ${i}`,ball.x-radius-7, ball.y-radius);
+                ctxbuffer.closePath();
+            }
+            
+            ctx.drawImage(canvasbuffer , 0, 0);    
+        }
+
+        function update() {
+            renderPlayer();
+        }
+        function keyupdate() {
+            let curPlayer = ballMap[myId];
+            if (rightPressed){
+                    curPlayer.x += playerSpeed;
+            }
+            if (leftPressed ){
+                curPlayer.x -= playerSpeed;
+            }
+            if(upPressed ){
+                curPlayer.y -= playerSpeed;
+            }
+            if(downPressed ){
+                curPlayer.y += playerSpeed;
+            }
+            if(rightPressed | leftPressed | upPressed |downPressed)
+                sendData();
+        }
+        
+        setInterval(update, 10);
+        setInterval(keyupdate, 1);
+
+
+    </script>
+
+</body>
+</html>

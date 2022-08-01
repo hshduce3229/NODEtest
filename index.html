@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Socket.IO chat</title>
+        <style>
+            /* .chat{position:relative;border:1px solid #ddd;height:500px;}
+            .chat form{position:absolute;bottom:0;left:0;width:100%;padding:10px;box-sizing:border-box;}
+            .chat form input[type="text"]{border:0;padding:0 15px;height:35px;line-height:35px;width:calc(100% - 140px);box-sizing:border-box;outline:none;border-bottom:1px solid #ddd;}
+            .chat form button{border:1px solid #ddd;background-color:#fff;color:#333;width:100px;height:35px;line-height:33px;margin-left:20px;}
+            #messages{height:calc(500px - 58px);overflow-y:scroll;} 
+            #messages li{}
+            */
+        </style>
+    </head>
+    <body>
+        <div class="chat">
+            <ul id="messages"></ul>
+            <form action="">
+                <input type="text" id="m" autocomplete="off" placeholder="Input Message" /><button>Send</button>
+            </form>
+        </div>
+    </body>
+</html>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+	var socket = io();
+</script> 
+
+<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+    $(function () 
+    {
+        var socket = io();
+
+        $('form').submit(function(e)
+        {
+            e.preventDefault(); // prevents page reloading ( 페이지 새로고침 막기 )
+            socket.emit('chat game', $('#m').val()); // "chat message"라는 이벤트 생성
+            $('#m').val(''); // 보낸 메세지 초기화
+            return false;
+        });
+
+        socket.on('chat game', function(msg){
+            var tag = "<li>" + msg + "</li>";
+            $('#messages').append(tag);
+        });
+    }); //$(function)
+</script>
